@@ -118,6 +118,6 @@
     </target>
     
     <target name="build"
-    	description="Clean, build, and e2e test" 
+    	description="Clean, build, and end to end tests" 
    		depends="clean, test.e2e.run" />
 </project>
