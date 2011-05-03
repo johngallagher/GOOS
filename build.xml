@@ -6,6 +6,26 @@
     <property name="app.classes.dir" location="${build.dir}/classes/app" />
     <property name="test.classes.dir" location="${build.dir}/classes/test" />
     
+    <target name="init">
+   	    <mkdir dir="${src.dir}" />
+   	    <mkdir dir="${src.dir}/auctionsniper" />
+   	    <mkdir dir="${src.dir}/auctionsniper/ui" />
+   	    <mkdir dir="${src.dir}/auctionsniper/util" />
+   	    <mkdir dir="${src.dir}/auctionsniper/xmpp" />
+   	    <mkdir dir="${src.dir}/test" />
+   	    <mkdir dir="${src.dir}/test/end-to-end" />
+   	    <mkdir dir="${src.dir}/test/end-to-end/endtoend" />
+   	    <mkdir dir="${src.dir}/test/end-to-end/endtoend/auctionsniper" />
+   	    <mkdir dir="${src.dir}/test/integration" />
+   	    <mkdir dir="${src.dir}/test/integration/auctionsniper" />
+   	    <mkdir dir="${src.dir}/test/integration/auctionsniper/ui" />
+   	    <mkdir dir="${src.dir}/test/integration/auctionsniper/xmpp" />
+   	    <mkdir dir="${src.dir}/test/unit" />
+   	    <mkdir dir="${src.dir}/test/unit/auctionsniper" />
+   	    <mkdir dir="${src.dir}/test/unit/auctionsniper/ui" />
+   	    <mkdir dir="${src.dir}/test/unit/auctionsniper/xmpp" />
+    </target>
+    
     <path id="app.lib.path">
         <fileset dir="${lib.dir}/deploy" includes="*.jar"/>
     </path>
@@ -31,7 +51,7 @@
 
     <target name="test.compile"
         	depends="app.compile">
-        <property name="test.src.dir" location="${test.dir}/end-to-end" />
+        <property name="test.src.dir" location="${test.dir}" />        
     	<mkdir dir="${test.classes.dir}" />
         <javac destdir="${test.classes.dir}"
                srcdir="${test.src.dir}"
@@ -44,12 +64,46 @@
             <http url="http://localhost:9090" />
         </waitfor>
     </target>
+
+    <target name="test.unit.run"
+    		description="Run the unit tests" 
+    		depends="test.compile" >
+        <property name="test.reports.dir" location="${build.dir}/testreports/unit"/>
+        <mkdir dir="${test.reports.dir}"/>
+        <junit>
+            <batchtest todir="${test.reports.dir}" haltonfailure="false" haltonerror="false">
+                <formatter type="plain"/>
+                <fileset dir="${test.dir}/unit" includes="**/*Test*.java" />
+            </batchtest>
+            <classpath>
+                <path refid="test.lib.path" />
+                <path location="${test.classes.dir}" />
+            </classpath>
+        </junit>
+    </target>
     
-    <target name="test.run"
-    		description="Run the tests" 
+    <target name="test.int.run"
+    		description="Run the integration tests" 
+    		depends="test.compile" >
+        <property name="test.reports.dir" location="${build.dir}/testreports/integration"/>
+        <mkdir dir="${test.reports.dir}"/>
+        <junit>
+            <batchtest todir="${test.reports.dir}" haltonfailure="false" haltonerror="false">
+                <formatter type="plain"/>
+                <fileset dir="${test.dir}/integration" includes="**/*Test*.java" />
+            </batchtest>
+            <classpath>
+                <path refid="test.lib.path" />
+                <path location="${test.classes.dir}" />
+            </classpath>
+        </junit>
+    </target>    
+    
+    <target name="test.e2e.run"
+    		description="Run the end to end tests" 
     		depends="test.compile, openfire.check" >
         <fail message="OpenFire is not running" if="openfire.is.down"/>
-        <property name="test.reports.dir" location="${build.dir}/testreports"/>
+        <property name="test.reports.dir" location="${build.dir}/testreports/end-to-end"/>
         <mkdir dir="${test.reports.dir}"/>
         <junit>
             <batchtest todir="${test.reports.dir}" haltonfailure="true" haltonerror="true">
@@ -64,6 +118,6 @@
     </target>
     
     <target name="build"
-    	description="Clean, build, and full test" 
-   		depends="clean, test.run" />
+    	description="Clean, build, and e2e test" 
+   		depends="clean, test.e2e.run" />
 </project>
